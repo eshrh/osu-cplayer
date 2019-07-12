@@ -5,7 +5,7 @@ command line osu! song player built on mpv
 + Python 3.4+
 + [mpv](https://mpv.io/installation/)
 + [python-mpv](https://github.com/jaseg/python-mpv)
-+ [urwid[(https://github.com/urwid/urwid/wiki/Installation-instructions)
++ [urwid](https://github.com/urwid/urwid/wiki/Installation-instructions)
 + [tinytag](https://github.com/devsnd/tinytag)
 
 ## Usage
