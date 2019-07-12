@@ -85,6 +85,9 @@ def play(name):
     listwalker.set_focus(names.index(name))
     player.play(str(namedict[name]))
     songPlaying = name
+
+    nowplayingtext.set_text(songPlaying)
+    mainloop.draw_screen();
     trackPlayback(name,durdict[name])
 
 def pause():
@@ -115,6 +118,11 @@ def getSongList(content,a):
     listwalker = urwid.SimpleListWalker(content)
     return urwid.ListBox(listwalker)
 
+nowplayingtext = urwid.Text("osu-cplayer",'center')
+def getNowPlaying(a,b):
+
+    return urwid.AttrMap(nowplayingtext,'now playing')
+
 def listener(key):
     global loopsong
     if(key in {'q','esc','ctrl c'}):
@@ -135,8 +143,11 @@ qhistory = []
 names,namedict,durdict = getSongs()
 
 content = [urwid.AttrMap(Song(name),"","reveal focus") for name in names]
-palette = [('reveal focus', 'black', 'dark cyan','standout')]
+palette = [('reveal focus', 'black', 'dark cyan','standout'),
+           ('now playing','black','light gray')
+]
 listBox = getSongList(content,a)
-mainloop = urwid.MainLoop(listBox,unhandled_input=listener,palette=palette)
+frame = urwid.Frame(listBox,header=getNowPlaying(0,0),footer=urwid.Text("goodbye world"))
+mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
 mainloop.run()
 player.terminate()
