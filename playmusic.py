@@ -53,6 +53,11 @@ def trackPlayback(name,duration):
 
 
 def nextsong(loop,data):
+    global loopsong
+    if data!=1 and loopsong:
+        play(songPlaying)
+        return 0
+    loopsong = False
     if not q.empty():
         play(q.get_nowait())
     else:
@@ -64,6 +69,7 @@ def nextsong(loop,data):
             play(names[pos+1])
         else:
             play(names[0])
+
 def prevsong():
     try:
         pos = names.index(songPlaying)
@@ -73,6 +79,8 @@ def prevsong():
         play(names[names.index(songPlaying)-1])
 
 def play(name):
+    if songAlarm!=0:
+        mainloop.remove_alarm(songAlarm)
     global songPlaying
     listwalker.set_focus(names.index(name))
     player.play(str(namedict[name]))
@@ -101,20 +109,24 @@ class Song(urwid.Text):
         return key
 
 listwalker = 0
+loopsong = False
 def getSongList(content,a):
     global listwalker
     listwalker = urwid.SimpleListWalker(content)
     return urwid.ListBox(listwalker)
 
 def listener(key):
+    global loopsong
     if(key in {'q','esc','ctrl c'}):
         raise urwid.ExitMainLoop()
     if(key=='p'):
         pause()
     if(key=='right'):
-        nextsong(0,0)
+        nextsong(0,1)
     if(key=='left'):
         prevsong()
+    if(key=='l'):
+        loopsong = not loopsong
 
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
