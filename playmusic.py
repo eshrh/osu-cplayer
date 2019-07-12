@@ -16,7 +16,7 @@ ABSPATH_TO_SONGS = ".."
 
 def getSongs():
     cur = ABSPATH_TO_SONGS
-    songdirs = [i for i in [j for j in os.walk(cur)][0][1] if i.split()[0].isdigit() and not i.endswith("[no video]")]
+    songdirs = [i for i in [j for j in os.walk(cur)][0][1] if i.split()[0].isdigit()]
     paths = [os.path.join(cur,i) for i in songdirs]
     audios = []
     for i in paths:
