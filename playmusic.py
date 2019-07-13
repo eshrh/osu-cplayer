@@ -171,14 +171,16 @@ nowplayingtext = urwid.Text("osu-cplayer",'center')
 def getNowPlaying():
     return urwid.AttrMap(nowplayingtext,'header')
 
-storeDefText = nowplayingtext.text
 def disp_notif(event):
     storeDefText = nowplayingtext.text
     nowplayingtext.set_text(event)
     mainloop.set_alarm_in(1,remove_notif)
 
 def remove_notif(a,b):
-    nowplayingtext.set_text(storeDefText)
+    if(songPlaying==0):
+        nowplayingtext.set_text("osu-cplayer")
+    else:
+        nowplayingtext.set_text(songPlaying)
 
 progbar = 0
 barAlarm = 0
@@ -250,7 +252,7 @@ def getFooter():
 
 def listener(key):
     global loopsong
-    if(key in {'q','ctrl c'}):
+    if(key in {'q','ctrl `1c'}):
         raise urwid.ExitMainLoop()
     if(key=='esc'):
         if(names!=rawnames):
@@ -272,6 +274,7 @@ def listener(key):
     if(key==":"):
         frame.focus_position = 'footer'
     if(key=="A"):
+        disp_notif("Queue cleared")
         q.clear()
 
 a = 0
