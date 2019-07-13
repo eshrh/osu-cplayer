@@ -45,13 +45,11 @@ songStarted = 0
 songAlarm = 0
 songPlaying = 0
 songPaused = 0
+pauseTime = 0
 def trackPlayback(name,duration):
     global songAlarm
     global songStarted
-    global songRemain
     songStarted = time.time()
-
-    mainloop.set_alarm_in(0.04,updateBar)
     songAlarm = mainloop.set_alarm_in(duration,nextsong)
 
 
@@ -81,35 +79,48 @@ def prevsong():
     if pos!=0:
         play(names[names.index(songPlaying)-1])
 
-
+realSongStart = 0
+progress = 0
 def play(name):
     if songAlarm!=0:
         mainloop.remove_alarm(songAlarm)
 
     global songPlaying
     global songPaused
+    global pauseTime
+    global realSongStart
+    global progress
     listwalker.set_focus(names.index(name))
     player.play(str(namedict[name]))
 
     songPlaying = name
     songPaused = 0
+    pauseTime = 0
+    realSongStart = time.time()
+    progress = 0
+    mainloop.set_alarm_in(0.1,updateBar)
 
     nowplayingtext.set_text(songPlaying)
     mainloop.draw_screen();
 
-    mainloop.set_alarm_in(0.04,updateBar) #?24 fps?
+     #?24 fps?
 
-    trackPlayback(name,durdict[name])
+    #trackPlayback(name,durdict[name])
 
 def pause():
+    global pauseTime
     global songPaused
+    global barAlarm
     player.pause = not player.pause
     if(player.pause==True):
         mainloop.remove_alarm(songAlarm)
+        if barAlarm!=0:
+            mainloop.remove_alarm(barAlarm)
         songPaused = time.time()
     else:
-        trackPlayback(songPlaying,durdict[songPlaying]-(songPaused-songStarted))
-
+        pauseTime+=time.time()-songPaused
+        barAlarm = mainloop.set_alarm_in(0.1,updateBar)
+        #trackPlayback(songPlaying,durdict[songPlaying]-(pauseTime))
 
 
 class Song(urwid.Text):
@@ -135,9 +146,18 @@ def getNowPlaying():
     return urwid.AttrMap(nowplayingtext,'header')
 
 progbar = 0
+barAlarm = 0
+
 def updateBar(a,b):
-    progbar.set_completion( (time.time()-songStarted)/durdict[songPlaying]*100 )
-    mainloop.set_alarm_in(0.1,updateBar)
+    global barAlarm
+    global progress
+    if not player.pause:
+        progress = (((time.time()-realSongStart)-pauseTime)/durdict[songPlaying])*100
+        progbar.set_completion(progress)
+    if int(progress)==100:
+        nextsong(0,0)
+        return 0
+    barAlarm = mainloop.set_alarm_in(0.1,updateBar)
 
 def getSongProgress():
     global progbar
