@@ -256,19 +256,24 @@ class FilterEdit(urwid.Edit):
             frame.focus_position = 'body'
         filterSongs(self.edit_text)
 
+filteredit = 0
 def filterInput():
-    return urwid.AttrMap(FilterEdit("filter(:) "),'footer')
+    global filteredit
+    filteredit = FilterEdit("filter(:) ")
+    return urwid.AttrMap(filteredit,'footer')
 
 def getFooter():
     return filterInput()
 
 def listener(key):
     global loopsong
+    global filteredit
     if(key in {'q','ctrl `1c'}):
         raise urwid.ExitMainLoop()
     if(key=='esc'):
         if(names!=rawnames):
             filterSongs("")
+            filteredit.edit_text = ""
         else:
             raise urwid.ExitMainLoop()
     if(key=='p'):
