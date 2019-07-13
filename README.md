@@ -2,7 +2,7 @@
 command line osu! song player built on mpv
 
 ## Dependencies
-+ Python 3.4+
++ Python 3.6+
 + [mpv](https://mpv.io/installation/)
 + [python-mpv](https://github.com/jaseg/python-mpv) (auto-install)
 + [urwid](https://github.com/urwid/urwid/wiki/Installation-instructions) (auto-install)
