@@ -48,7 +48,10 @@ songPaused = 0
 def trackPlayback(name,duration):
     global songAlarm
     global songStarted
+    global songRemain
     songStarted = time.time()
+
+    mainloop.set_alarm_in(0.04,updateBar)
     songAlarm = mainloop.set_alarm_in(duration,nextsong)
 
 
@@ -78,16 +81,24 @@ def prevsong():
     if pos!=0:
         play(names[names.index(songPlaying)-1])
 
+
 def play(name):
     if songAlarm!=0:
         mainloop.remove_alarm(songAlarm)
+
     global songPlaying
+    global songPaused
     listwalker.set_focus(names.index(name))
     player.play(str(namedict[name]))
+
     songPlaying = name
+    songPaused = 0
 
     nowplayingtext.set_text(songPlaying)
     mainloop.draw_screen();
+
+    mainloop.set_alarm_in(0.04,updateBar) #?24 fps?
+
     trackPlayback(name,durdict[name])
 
 def pause():
@@ -118,10 +129,24 @@ def getSongList(content,a):
     listwalker = urwid.SimpleListWalker(content)
     return urwid.ListBox(listwalker)
 
-nowplayingtext = urwid.Text("osu-cplayer",'center')
-def getNowPlaying(a,b):
 
-    return urwid.AttrMap(nowplayingtext,'now playing')
+nowplayingtext = urwid.Text("osu-cplayer",'center')
+def getNowPlaying():
+    return urwid.AttrMap(nowplayingtext,'header')
+
+progbar = 0
+def updateBar(a,b):
+    progbar.set_completion( (time.time()-songStarted)/durdict[songPlaying]*100 )
+    mainloop.set_alarm_in(0.1,updateBar)
+
+def getSongProgress():
+    global progbar
+    progbar = urwid.ProgressBar('barIncomplete','barComplete')
+    return progbar
+
+def getHeader():
+    header = urwid.Pile([getNowPlaying(),getSongProgress()])
+    return header
 
 def listener(key):
     global loopsong
@@ -135,6 +160,10 @@ def listener(key):
         prevsong()
     if(key=='l'):
         loopsong = not loopsong
+        if(loopsong==True):
+            nowplayingtext.set_text(songPlaying+" -looping-")
+        else:
+            nowplayingtext.set_text(songPlaying)
 
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
@@ -144,10 +173,12 @@ names,namedict,durdict = getSongs()
 
 content = [urwid.AttrMap(Song(name),"","reveal focus") for name in names]
 palette = [('reveal focus', 'black', 'dark cyan','standout'),
-           ('now playing','black','light gray')
+           ('header','black','light gray'),
+           ('barIncomplete','light gray','light gray'),
+           ('barComplete','light green','light green')
 ]
 listBox = getSongList(content,a)
-frame = urwid.Frame(listBox,header=getNowPlaying(0,0),footer=urwid.Text("goodbye world"))
+frame = urwid.Frame(listBox,header=getHeader(),footer=urwid.Text("goodbye world"))
 mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
 mainloop.run()
 player.terminate()
