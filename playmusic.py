@@ -192,17 +192,14 @@ def listener(key):
         prevsong()
     if(key=='l'):
         loopsong = not loopsong
-<<<<<<< HEAD
         if(loopsong==True):
             nowplayingtext.set_text(songPlaying+" -looping-")
         else:
             nowplayingtext.set_text(songPlaying)
-=======
     if(key=='s'):
         shuffle()
     if(key=='S'):
         sort()
->>>>>>> 84f74cf9f8b25d276f1175968693d93bbacf0c24
 
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
@@ -216,13 +213,8 @@ palette = [('reveal focus', 'black', 'dark cyan','standout'),
            ('barIncomplete','light gray','light gray'),
            ('barComplete','light green','light green')
 ]
-<<<<<<< HEAD
 listBox = getSongList(content,a)
 frame = urwid.Frame(listBox,header=getHeader(),footer=urwid.Text("goodbye world"))
-=======
-listBox = getSongList(a)
-frame = urwid.Frame(listBox,header=getNowPlaying(0,0),footer=urwid.Text("goodbye world"))
->>>>>>> 84f74cf9f8b25d276f1175968693d93bbacf0c24
 mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
 mainloop.run()
 player.terminate()
