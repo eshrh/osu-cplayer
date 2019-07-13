@@ -1,17 +1,40 @@
+##### EDIT THIS TO POINT TO OSU SONGS FOLDER #####
+ABSPATH_TO_SONGS = ".."
+
 import os
 from pathlib import Path
-import mpv
-import urwid
+import random
+import webbrowser
 import time
 from collections import deque
 from locale import setlocale, LC_NUMERIC
-from tinytag import TinyTag as tag
-import random
-import webbrowser
+
+installedPackage = False
+def install(package):
+    global installedPackage
+    installedPackage = True
+    from pip._internal import main as pip
+    pip(['install', '--user', package])
+try:
+    import mpv
+except Exception:
+    install('python-mpv')
+
+try:
+    import urwid
+except Exception:
+    install("urwid")
+try:
+    from tinytag import TinyTag as tag
+except Exception:
+    install('tinytag')
+if(installedPackage):
+    raise Exception("run the program one more time")
+
 setlocale(LC_NUMERIC, "C")
 
-##### EDIT THIS TO POINT TO OSU SONGS FOLDER #####
-ABSPATH_TO_SONGS = ".."
+
+
 
 
 

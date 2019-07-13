@@ -4,13 +4,13 @@ command line osu! song player built on mpv
 ## Dependencies
 + Python 3.4+
 + [mpv](https://mpv.io/installation/)
-+ [python-mpv](https://github.com/jaseg/python-mpv)
-+ [urwid](https://github.com/urwid/urwid/wiki/Installation-instructions)
-+ [tinytag](https://github.com/devsnd/tinytag)
++ [python-mpv](https://github.com/jaseg/python-mpv) (auto-install)
++ [urwid](https://github.com/urwid/urwid/wiki/Installation-instructions) (auto-install)
++ [tinytag](https://github.com/devsnd/tinytag) (auto-install)
 
 ## Usage
 1. Download `playmusic.py`
-2. Edit `ABSPATH_TO_SONGS` to the absolute path of your osu! songs folder
+2. Edit `ABSPATH_TO_SONGS` to the absolute path of your osu! songs folder. The default path implies that the script is inside a folder in the Songs directory.
 3. Run with `python3 playmusic.py`
 
 ## Controls
