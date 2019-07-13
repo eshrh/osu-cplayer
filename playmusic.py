@@ -95,7 +95,8 @@ progress = 0
 def play(name):
     if songAlarm!=0:
         mainloop.remove_alarm(songAlarm)
-
+    if(player.pause):
+        pause()
     global songPlaying
     global songPaused
     global pauseTime
