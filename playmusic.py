@@ -158,9 +158,6 @@ class Song(urwid.Text):
             if time.time()-self.lastm1<0.2:
                 play(self.text)
             self.lastm1 = time.time()
-        if(event=='mouse press' and button==3):
-            q.appendleft(self.text)
-            disp_notif(f"{self.text} added to queue ({len(q)} items)")
         try:
             if(event=='mouse press' and button==4):
                 listwalker.set_focus(listwalker.next_position(listwalker.get_focus()[1]))
