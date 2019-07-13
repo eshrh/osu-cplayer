@@ -7,6 +7,7 @@ from collections import deque
 from locale import setlocale, LC_NUMERIC
 from tinytag import TinyTag as tag
 import random
+import webbrowser
 setlocale(LC_NUMERIC, "C")
 
 ##### EDIT THIS TO POINT TO OSU SONGS FOLDER #####
@@ -157,6 +158,16 @@ class Song(urwid.Text):
             if time.time()-self.lastm1<0.2:
                 play(self.text)
             self.lastm1 = time.time()
+        if(event=='mouse press' and button==3):
+            q.appendleft(self.text)
+            disp_notif(f"{self.text} added to queue ({len(q)} items)")
+        try:
+            if(event=='mouse press' and button==4):
+                listwalker.set_focus(listwalker.next_position(listwalker.get_focus()[1]))
+            if(event=='mouse press' and button==5):
+                listwalker.set_focus(listwalker.prev_position(listwalker.get_focus()[1]))
+        except IndexError:
+            pass
 
 listwalker = 0
 loopsong = False
@@ -198,7 +209,7 @@ class SongBar(urwid.ProgressBar):
     global progress
     def get_text(self):
         if songPlaying==0:
-                return f"{len(names)} songs available"
+                return f"{len(names)} songs available (Press ? for help)"
         if loopsong:
             return f"{pptime((progress/100)*durdict[songPlaying])}/{pptime(durdict[songPlaying])} [looping]"
         return f"{pptime((progress/100)*durdict[songPlaying])}/{pptime(durdict[songPlaying])}"
@@ -274,6 +285,8 @@ def listener(key):
         sort()
     if(key==":"):
         frame.focus_position = 'footer'
+    if(key=="?"):
+        webbrowser.open_new_tab("https://github.com/eshanrh/osu-cplayer#controls")
     if(key=="A"):
         disp_notif("Queue cleared")
         q.clear()
