@@ -160,6 +160,23 @@ def getNowPlaying():
 progbar = 0
 barAlarm = 0
 
+def pptime(sec):
+    m,s = [int(i) for i in divmod(sec,60)]
+    if s==0:
+        s = "00"
+    elif s<10:
+        s = str(0)+str(s)
+    return f"{m}:{s}"
+
+class SongBar(urwid.ProgressBar):
+    global progress
+    def get_text(self):
+        if songPlaying==0:
+                return f"{len(names)} songs available"
+        if loopsong:
+            return f"{pptime(progress)}/{pptime(durdict[songPlaying])} [looping]"
+        return f"{pptime(progress)}/{pptime(durdict[songPlaying])}"
+
 def updateBar(a,b):
     global barAlarm
     global progress
@@ -173,7 +190,7 @@ def updateBar(a,b):
 
 def getSongProgress():
     global progbar
-    progbar = urwid.ProgressBar('barIncomplete','barComplete')
+    progbar = SongBar('barIncomplete','barComplete')
     return progbar
 
 def getHeader():
@@ -192,10 +209,6 @@ def listener(key):
         prevsong()
     if(key=='l'):
         loopsong = not loopsong
-        if(loopsong==True):
-            nowplayingtext.set_text(songPlaying+" -looping-")
-        else:
-            nowplayingtext.set_text(songPlaying)
     if(key=='s'):
         shuffle()
     if(key=='S'):
@@ -210,7 +223,7 @@ names,namedict,durdict = getSongs()
 content = [urwid.AttrMap(Song(name),"","reveal focus") for name in names]
 palette = [('reveal focus', 'black', 'dark cyan','standout'),
            ('header','black','light gray'),
-           ('barIncomplete','light gray','light gray'),
+           ('barIncomplete','black','light gray'),
            ('barComplete','light green','light green')
 ]
 listBox = getSongList(a)
