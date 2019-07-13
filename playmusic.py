@@ -250,8 +250,13 @@ def getFooter():
 
 def listener(key):
     global loopsong
-    if(key in {'q','esc','ctrl c'}):
+    if(key in {'q','ctrl c'}):
         raise urwid.ExitMainLoop()
+    if(key=='esc'):
+        if(names!=rawnames):
+            filterSongs("")
+        else:
+            raise urwid.ExitMainLoop()
     if(key=='p'):
         pause()
     if(key=='right'):

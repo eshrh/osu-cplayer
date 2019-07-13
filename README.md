@@ -20,7 +20,10 @@ command line osu! song player built on mpv
 + Toggle play/pause: `p`
 + Quit: `q` or `esc`
 + Add song to queue: `a`
++ Clear queue: `A`
 + Shuffle: `s`
 + Sort: `S`
-+ Filter: `:` followed by filter term
++ Filter: `:` or mouse followed by filter term
+	+ Reset filter: `esc`
+	+ Exit text box: any special key or mouse
 
