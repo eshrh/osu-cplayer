@@ -137,6 +137,9 @@ def pause():
 
 
 class Song(urwid.Text):
+    def __init__(self,txt):
+        self.__super.__init__(txt)
+        self.lastm1 = 0
     def selectable(self):
         return True
     def keypress(self, size, key):
@@ -145,6 +148,11 @@ class Song(urwid.Text):
         if(key=='a'):
             q.appendleft(self.text)
         return key
+    def mouse_event(self,size,event,button,col,row,focus):
+        if(event=='mouse press' and button==1):
+            if time.time()-self.lastm1<0.2:
+                play(self.text)
+            self.lastm1 = time.time()
 
 listwalker = 0
 loopsong = False
