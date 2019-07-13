@@ -6,7 +6,7 @@ import time
 import queue
 from locale import setlocale, LC_NUMERIC
 from tinytag import TinyTag as tag
-import pyglet
+import random
 setlocale(LC_NUMERIC, "C")
 
 ##### EDIT THIS TO POINT TO OSU SONGS FOLDER #####
@@ -40,6 +40,17 @@ def getSongs():
         info = tag.get(audios[pos])
         durdict[temp] = info.duration
     return (sorted(list(set(names))),namedict,durdict)
+
+def shuffle():
+    random.shuffle(names)
+    listwalker.clear()
+    for i in names:
+        listwalker.append(urwid.AttrMap(Song(i),'','reveal focus'))
+def sort():
+    names.sort()
+    listwalker.clear()
+    for i in names:
+        listwalker.append(urwid.AttrMap(Song(i),'','reveal focus'))
 
 songStarted = 0
 songAlarm = 0
@@ -113,8 +124,9 @@ class Song(urwid.Text):
 
 listwalker = 0
 loopsong = False
-def getSongList(content,a):
+def getSongList(a):
     global listwalker
+    global content
     listwalker = urwid.SimpleListWalker(content)
     return urwid.ListBox(listwalker)
 
@@ -135,6 +147,10 @@ def listener(key):
         prevsong()
     if(key=='l'):
         loopsong = not loopsong
+    if(key=='s'):
+        shuffle()
+    if(key=='S'):
+        sort()
 
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
@@ -146,7 +162,7 @@ content = [urwid.AttrMap(Song(name),"","reveal focus") for name in names]
 palette = [('reveal focus', 'black', 'dark cyan','standout'),
            ('now playing','black','light gray')
 ]
-listBox = getSongList(content,a)
+listBox = getSongList(a)
 frame = urwid.Frame(listBox,header=getNowPlaying(0,0),footer=urwid.Text("goodbye world"))
 mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
 mainloop.run()
