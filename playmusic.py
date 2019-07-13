@@ -45,12 +45,12 @@ def shuffle():
     random.shuffle(names)
     listwalker.clear()
     for i in names:
-        listwalker.append(urwid.AttrMap(Song(i),'','reveal focus'))
+        listwalker.append(urwid.AttrMap(Song(i),'','select'))
 def sort():
     names.sort()
     listwalker.clear()
     for i in names:
-        listwalker.append(urwid.AttrMap(Song(i),'','reveal focus'))
+        listwalker.append(urwid.AttrMap(Song(i),'','select'))
 
 songStarted = 0
 songAlarm = 0
@@ -107,6 +107,8 @@ def play(name):
 
 
     songPlaying = name
+
+
     songPaused = 0
     pauseTime = 0
     realSongStart = time.time()
@@ -124,6 +126,8 @@ def pause():
     global pauseTime
     global songPaused
     global barAlarm
+    if(songPlaying==0):
+        return 0
     player.pause = not player.pause
     if(player.pause==True):
         mainloop.remove_alarm(songAlarm)
@@ -212,7 +216,7 @@ def filterSongs(term):
     names = [i for i in rawnames if term in i]
     listwalker.clear()
     for i in names:
-        listwalker.append(urwid.AttrMap(Song(i),"","reveal focus"))
+        listwalker.append(urwid.AttrMap(Song(i),"","select"))
     if(len(listwalker)>=1):
         listwalker.set_focus(0)
 
@@ -250,6 +254,8 @@ def listener(key):
         sort()
     if(key==":"):
         frame.focus_position = 'footer'
+    if(key=="A"):
+        q.clear()
 
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
@@ -258,8 +264,8 @@ qhistory = []
 rawnames,namedict,durdict = getSongs()
 names = rawnames.copy()
 
-content = [urwid.AttrMap(Song(name),"","reveal focus") for name in names]
-palette = [('reveal focus', 'black', 'dark cyan','standout'),
+content = [urwid.AttrMap(Song(name),"","select") for name in names]
+palette = [('select', 'black', 'dark cyan','standout'),
            ('header','black','light gray'),
            ('barIncomplete','black','light gray'),
            ('barComplete','black','light green'),
