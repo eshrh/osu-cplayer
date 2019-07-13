@@ -213,7 +213,7 @@ palette = [('reveal focus', 'black', 'dark cyan','standout'),
            ('barIncomplete','light gray','light gray'),
            ('barComplete','light green','light green')
 ]
-listBox = getSongList(content,a)
+listBox = getSongList(a)
 frame = urwid.Frame(listBox,header=getHeader(),footer=urwid.Text("goodbye world"))
 mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
 mainloop.run()
