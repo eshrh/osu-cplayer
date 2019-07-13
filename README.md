@@ -15,7 +15,7 @@ command line osu! song player built on mpv
 
 ## Controls
 + Previous/Next Song: `left`/`right`
-+ Move Selection: `up`/`down` or left click
++ Move Selection: `up`/`down`, left click, or scroll
 + Play song: `enter` or double click
 + Toggle play/pause: `p`
 + Quit: `q` or `esc`
