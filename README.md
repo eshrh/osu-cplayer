@@ -15,12 +15,12 @@ command line osu! song player built on mpv
 
 ## Controls
 + Previous/Next Song: `left`/`right`
-+ Move Selection: `up`/`down` or mouse movement
-+ Play song: `enter`
++ Move Selection: `up`/`down` or left click
++ Play song: `enter` or double click
 + Toggle play/pause: `p`
 + Quit: `q` or `esc`
 + Add song to queue: `a`
 + Shuffle: `s`
-+ Resort: `S`
++ Sort: `S`
 + Filter: `:` followed by filter term
 
