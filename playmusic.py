@@ -104,18 +104,16 @@ def play(name):
 
     listwalker.set_focus(names.index(name))
     player.play(str(namedict[name]))
-
-
     songPlaying = name
-
-
     songPaused = 0
     pauseTime = 0
     realSongStart = time.time()
     progress = 0
-    mainloop.set_alarm_in(0.1,updateBar)
 
     nowplayingtext.set_text(songPlaying)
+    mainloop.set_alarm_in(0.1,updateBar)
+
+
     mainloop.draw_screen();
 
      #?24 fps?
@@ -151,6 +149,7 @@ class Song(urwid.Text):
             play(self.text)
         if(key=='a'):
             q.appendleft(self.text)
+            disp_notif(f"{self.text} added to queue ({len(q)} items)")
         return key
     def mouse_event(self,size,event,button,col,row,focus):
         if(event=='mouse press' and button==1):
@@ -167,9 +166,19 @@ def getSongList(a):
     return urwid.ListBox(listwalker)
 
 
+
 nowplayingtext = urwid.Text("osu-cplayer",'center')
 def getNowPlaying():
     return urwid.AttrMap(nowplayingtext,'header')
+
+storeDefText = nowplayingtext.text
+def disp_notif(event):
+    storeDefText = nowplayingtext.text
+    nowplayingtext.set_text(event)
+    mainloop.set_alarm_in(1,remove_notif)
+
+def remove_notif(a,b):
+    nowplayingtext.set_text(storeDefText)
 
 progbar = 0
 barAlarm = 0
@@ -224,6 +233,9 @@ class FilterEdit(urwid.Edit):
     def keypress(self, size, key):
         if key=='backspace':
             self.edit_text = self.edit_text[:-1]
+        elif key=='esc':
+            self.edit_text = ""
+            frame.focus_position = 'body'
         elif len(key)==1:
             self.edit_text += key
         else:
