@@ -3,7 +3,7 @@ from pathlib import Path
 import mpv
 import urwid
 import time
-import queue
+from collections import deque
 from locale import setlocale, LC_NUMERIC
 from tinytag import TinyTag as tag
 import random
@@ -70,8 +70,8 @@ def nextsong(loop,data):
         play(songPlaying)
         return 0
     loopsong = False
-    if not q.empty():
-        play(q.get_nowait())
+    if len(q)>0:
+        play(q.pop())
     else:
         try:
             pos = names.index(songPlaying)
@@ -101,8 +101,10 @@ def play(name):
     global pauseTime
     global realSongStart
     global progress
+
     listwalker.set_focus(names.index(name))
     player.play(str(namedict[name]))
+
 
     songPlaying = name
     songPaused = 0
@@ -141,7 +143,7 @@ class Song(urwid.Text):
         if(key=='enter'):
             play(self.text)
         if(key=='a'):
-            q.put_nowait(self.text)
+            q.appendleft(self.text)
         return key
 
 listwalker = 0
@@ -174,8 +176,8 @@ class SongBar(urwid.ProgressBar):
         if songPlaying==0:
                 return f"{len(names)} songs available"
         if loopsong:
-            return f"{pptime(progress)}/{pptime(durdict[songPlaying])} [looping]"
-        return f"{pptime(progress)}/{pptime(durdict[songPlaying])}"
+            return f"{pptime((progress/100)*durdict[songPlaying])}/{pptime(durdict[songPlaying])} [looping]"
+        return f"{pptime((progress/100)*durdict[songPlaying])}/{pptime(durdict[songPlaying])}"
 
 def updateBar(a,b):
     global barAlarm
@@ -197,6 +199,31 @@ def getHeader():
     header = urwid.Pile([getNowPlaying(),getSongProgress()])
     return header
 
+def filterSongs(term):
+    global names
+    names = [i for i in rawnames if term in i]
+    listwalker.clear()
+    for i in names:
+        listwalker.append(urwid.AttrMap(Song(i),"","reveal focus"))
+    if(len(listwalker)>=1):
+        listwalker.set_focus(0)
+
+class FilterEdit(urwid.Edit):
+    def keypress(self, size, key):
+        if key=='backspace':
+            self.edit_text = self.edit_text[:-1]
+        elif len(key)==1:
+            self.edit_text += key
+        else:
+            frame.focus_position = 'body'
+        filterSongs(self.edit_text)
+
+def filterInput():
+    return urwid.AttrMap(FilterEdit("filter(:) "),'footer')
+
+def getFooter():
+    return filterInput()
+
 def listener(key):
     global loopsong
     if(key in {'q','esc','ctrl c'}):
@@ -213,21 +240,25 @@ def listener(key):
         shuffle()
     if(key=='S'):
         sort()
+    if(key==":"):
+        frame.focus_position = 'footer'
 
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
-q = queue.Queue()
+q = deque()
 qhistory = []
-names,namedict,durdict = getSongs()
+rawnames,namedict,durdict = getSongs()
+names = rawnames.copy()
 
 content = [urwid.AttrMap(Song(name),"","reveal focus") for name in names]
 palette = [('reveal focus', 'black', 'dark cyan','standout'),
            ('header','black','light gray'),
            ('barIncomplete','black','light gray'),
-           ('barComplete','light green','light green')
+           ('barComplete','black','light green'),
+           ('footer','black','light gray')
 ]
 listBox = getSongList(a)
-frame = urwid.Frame(listBox,header=getHeader(),footer=urwid.Text("goodbye world"))
+frame = urwid.Frame(listBox,header=getHeader(),footer=getFooter())
 mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
 mainloop.run()
 player.terminate()

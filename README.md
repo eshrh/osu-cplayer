@@ -20,3 +20,5 @@ command line osu! song player built on mpv
 + Toggle play/pause: `p`
 + Quit: `q` or `esc`
 + Add song to queue: `a`
++ Filter: `:` followed by filter term
+
