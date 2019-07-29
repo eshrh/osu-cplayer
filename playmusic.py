@@ -1,5 +1,5 @@
 ##### EDIT THIS TO POINT TO OSU SONGS FOLDER #####
-ABSPATH_TO_SONGS = ".."
+ABSPATH_TO_SONGS = "/Applications/osu!.app/drive_c/Program Files/osu!/Songs"
 
 import os
 from pathlib import Path
@@ -315,7 +315,9 @@ def listener(key):
     if(key=="A"):
         disp_notif("Queue cleared")
         q.clear()
-
+    if(key=="r"):
+        if(songPlaying!=0):
+            play(songPlaying)
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
 q = deque()
