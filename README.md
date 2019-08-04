@@ -1,5 +1,5 @@
 # osu-cplayer
-command line osu! song player built on mpv
+Fast and compact command line osu! song player built on mpv
 
 ## Dependencies
 + Python 3.6+
@@ -26,4 +26,4 @@ command line osu! song player built on mpv
 + Filter: `:` or mouse followed by filter term
 	+ Reset filter: `esc`
 	+ Exit text box: any special key or mouse
-
++ Filter by Collection: `c` or mouse, followed by collection name, and `enter`
