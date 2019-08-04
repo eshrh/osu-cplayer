@@ -1,13 +1,17 @@
 ##### EDIT THIS TO POINT TO OSU SONGS FOLDER #####
 ABSPATH_TO_SONGS = "/Applications/osu!.app/drive_c/Program Files/osu!/Songs"
-
+ABSPATH_TO_COLLECTIONS = "/Applications/osu!.app/drive_c/Program Files/osu!/collection.db"
 import os
 from pathlib import Path
 import random
 import webbrowser
 import time
+import shutil
+import struct
+import hashlib
 from collections import deque
 from locale import setlocale, LC_NUMERIC
+
 
 installedPackage = False
 def install(package):
@@ -43,9 +47,11 @@ def getSongs():
     songdirs = [i for i in [j for j in os.walk(cur)][0][1] if i.split()[0].isdigit()]
     paths = [os.path.join(cur,i) for i in songdirs]
     audios = []
+    osufiles = []
     for i in paths:
-        osufile = [i for i in Path(i).glob("*.osu")][0]
-        with open(osufile,"r") as f:
+        osufile = [i for i in Path(i).glob("*.osu")]
+        osufiles.append(osufile)
+        with open(osufile[0],"r") as f:
             for line in f.readlines():
                 if(line.startswith("AudioFilename")):
                     audioFilename = line[line.index(":")+2:].strip()
@@ -54,16 +60,22 @@ def getSongs():
     names = []
     namedict = {}
     durdict = {}
+    osudict = {}
     for pos,i in enumerate(songdirs):
         temp = i
         if(i.endswith("[no video]")):
             temp = temp[:-10]
         temp = " ".join(temp.split()[1:])
         names.append(temp)
+
         namedict[temp] = audios[pos]
+
         info = tag.get(audios[pos])
         durdict[temp] = info.duration
-    return (sorted(list(set(names))),namedict,durdict)
+
+        osudict[temp] = osufiles[pos]
+
+    return (sorted(list(set(names))),namedict,durdict,osudict)
 
 def shuffle():
     random.shuffle(names)
@@ -263,18 +275,56 @@ def filterSongs(term):
     if(len(listwalker)>=1):
         listwalker.set_focus(0)
 
+def showCollection(c):
+    global names
+    names = []
+    for i in rawnames:
+        try:
+            for j in md5s[i]:
+                if j in collections[c]:
+                    names.append(i)
+                    break
+        except KeyError:
+            pass
+    listwalker.clear()
+    for i in names:
+        listwalker.append(urwid.AttrMap(Song(i),"","select"))
+    if(len(listwalker)>=1):
+        listwalker.set_focus(0)
+
+
 class FilterEdit(urwid.Edit):
     def keypress(self, size, key):
         if key=='backspace':
             self.edit_text = self.edit_text[:-1]
         elif key=='esc':
             self.edit_text = ""
+            editboxtext = "filter(:) "
             frame.focus_position = 'body'
         elif len(key)==1:
             self.edit_text += key
+        elif key=='down':
+            footer.focus_position = 1
         else:
             frame.focus_position = 'body'
         filterSongs(self.edit_text)
+
+class CollectionEdit(urwid.Edit):
+    def keypress(self, size, key):
+        if key=='backspace':
+            self.edit_text = self.edit_text[:-1]
+        elif key=='esc':
+            self.edit_text = ""
+            editboxtext = "filter(:) "
+            frame.focus_position = 'body'
+        elif len(key)==1:
+            self.edit_text += key
+        elif key=='enter':
+            showCollection(self.edit_text)
+        elif key=='up':
+            footer.focus_position = 0
+        else:
+            frame.focus_position = 'body'
 
 filteredit = 0
 def filterInput():
@@ -282,8 +332,17 @@ def filterInput():
     filteredit = FilterEdit("filter(:) ")
     return urwid.AttrMap(filteredit,'footer')
 
+collectionedit = 0
+def collectionInput():
+    global collectionedit
+    collectionedit = CollectionEdit("Enter collection name(c): ")
+    return urwid.AttrMap(collectionedit,'footer')
+
+footer = 0
 def getFooter():
-    return filterInput()
+    global footer
+    footer = urwid.Pile([filterInput(),collectionInput()])
+    return footer
 
 def listener(key):
     global loopsong
@@ -310,6 +369,10 @@ def listener(key):
         sort()
     if(key==":"):
         frame.focus_position = 'footer'
+        footer.focus_position = 0
+    if(key=="c"):
+        frame.focus_position = 'footer'
+        footer.focus_position = 1
     if(key=="?"):
         webbrowser.open_new_tab("https://github.com/eshanrh/osu-cplayer#controls")
     if(key=="A"):
@@ -318,11 +381,60 @@ def listener(key):
     if(key=="r"):
         if(songPlaying!=0):
             play(songPlaying)
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+def generateHashes(osudict):
+    md5s = {}
+    for i in osudict:
+        md5s[i] = [md5(j) for j in osudict[i]]
+    return md5s
+
+def nextint(f):
+    return struct.unpack("<I",f.read(4))[0]
+
+def nextstr(f):
+    if f.read(1)==0x00:
+        return
+    len = 0
+    shift = 0
+    while(True):
+        byte = ord(f.read(1))
+        len |= (byte & 0b01111111) <<shift
+        if (byte & 0b10000000)==0:
+            break
+        shift+=7
+    return f.read(len).decode('utf-8')
+
+def getCollections():
+    col = {}
+    f = open(ABSPATH_TO_COLLECTIONS,"rb")
+    nextint(f)
+    ncol = nextint(f)
+    for i in range(ncol):
+        colname = nextstr(f)
+        col[colname] = []
+        for j in range(nextint(f)):
+            f.read(2)
+            col[colname].append(f.read(32).decode('utf-8'))
+    f.close()
+    return col
+
+
 a = 0
 player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
 q = deque()
 qhistory = []
-rawnames,namedict,durdict = getSongs()
+rawnames,namedict,durdict,osudict = getSongs()
+
+md5s = generateHashes(osudict)
+
+collections = getCollections()
+
 names = rawnames.copy()
 
 content = [urwid.AttrMap(Song(name),"","select") for name in names]
