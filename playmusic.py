@@ -45,10 +45,11 @@ setlocale(LC_NUMERIC, "C")
 def getSongs():
     cur = ABSPATH_TO_SONGS
     songdirs = [i for i in [j for j in os.walk(cur)][0][1] if i.split()[0].isdigit()]
+    songdirs = [j for j in songdirs if [i for i in Path(os.path.join(cur,j)).glob("*.osu")]!=[] ]
     paths = [os.path.join(cur,i) for i in songdirs]
     audios = []
     osufiles = []
-    for i in paths:
+    for num,i in enumerate(paths):
         osufile = [i for i in Path(i).glob("*.osu")]
         osufiles.append(osufile)
         with open(osufile[0],"r") as f:
