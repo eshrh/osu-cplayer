@@ -1,5 +1,5 @@
 # osu-cplayer
-Fast and compact command line osu! song player built on mpv
+Fast, compact, and featured command line osu! song player built on mpv.
 
 ## Dependencies
 + Python 3.6+
@@ -10,8 +10,11 @@ Fast and compact command line osu! song player built on mpv
 
 ## Usage
 1. Download `playmusic.py`
-2. Edit `ABSPATH_TO_SONGS` to the absolute path of your osu! songs folder. The default path implies that the script is inside a folder in the Songs directory.
-3. Run with `python3 playmusic.py`
+2. Edit the following variables:
+	1. `ABSPATH_TO_SONGS` to the absolute path of your osu Songs folder
+	2. `ABSPATH_TO_COLLECTIONS` to the absolute path of your osu collections.db file
+	3. `ABSPATH_TO_OSU` to the absolute path of your osu osu!.db file
+3. Run with `python3 playmusic.py` and maybe set an alias for it as well.
 
 ## Controls
 + Previous/Next Song: `left`/`right`
