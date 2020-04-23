@@ -27,3 +27,6 @@ Fast and compact command line osu! song player built on mpv
 	+ Reset filter: `esc`
 	+ Exit text box: any special key or mouse
 + Filter by Collection: `c` or mouse, followed by collection name, and `enter`
+
+## Other
+osu!.db reading code is taken from [OsuDbReader](https://github.com/Awlexus/PyOsuDBReader/)
