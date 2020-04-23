@@ -22,7 +22,8 @@ Fast and compact command line osu! song player built on mpv
 + Add song to queue: `a`
 + Clear queue: `A`
 + Shuffle: `s`
-+ Sort: `S`
++ Sort alphabetically(default): `S`
++ Sort by date added: `d`
 + Filter: `:` or mouse followed by filter term
 	+ Reset filter: `esc`
 	+ Exit text box: any special key or mouse
