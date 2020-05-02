@@ -72,8 +72,7 @@ def getSongs():
             durdict[name] = tag.get(audio).duration
             osudict[name] = Path(os.path.join(cur,i['folder_name'],i['osu_file']))
             timedict[name] = i['last_modification_time']
-        except TypeError as t:
-            print(t) 
+        except TypeError:
             pass
     return (names,namedict,durdict,osudict,timedict)
 
