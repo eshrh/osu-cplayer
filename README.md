@@ -1,5 +1,6 @@
 # osu-cplayer
 Fast, compact, and featured command line osu! song player built on mpv.
+![screenshot](https://github.com/eshrh/osu-cplayer/raw/master/2020-04-23-161205_1920x1080_scrot.png)
 
 ## Dependencies
 + Python 3.6+
