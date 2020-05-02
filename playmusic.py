@@ -60,13 +60,20 @@ def getSongs():
     for i in beatmaps:
         try:
             audio = Path(os.path.join(cur,i['folder_name'],i['audio_file']))
+            if not audio.is_file():
+                audio_with_capital_a = Path(os.path.join(cur,i['folder_name'],i['audio_file'].capitalize()))
+                if audio_with_capital_a.is_file():
+                    audio = audio_with_capital_a
+                else:
+                    continue
             name = i['artist']+" - "+i['title']
             names.append(name)
             namedict[name] = audio
             durdict[name] = tag.get(audio).duration
             osudict[name] = Path(os.path.join(cur,i['folder_name'],i['osu_file']))
             timedict[name] = i['last_modification_time']
-        except TypeError:
+        except TypeError as t:
+            print(t) 
             pass
     return (names,namedict,durdict,osudict,timedict)
 
