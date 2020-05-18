@@ -8,6 +8,8 @@ Fast, compact, and featured command line osu! song player built on mpv.
 3. On first run, enter the absolute paths of your songs folder, collections.db file and osu!.db file
 4. These settings get saved in your home folder as `~/.osupaths` or equivalent.
 
+I've tested this on gnu/linux and macos, and it works. Windows is untested though, I'd appreciate someone trying it out.
+
 ## Usage
 + Previous/Next Song: `left`/`right`
 + Move Selection: `up`/`down`, left click, or scroll
