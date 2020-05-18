@@ -67,6 +67,8 @@ def getSongs():
                 else:
                     continue
             name = i['artist']+" - "+i['title']
+            if name in names:
+                name = name+" ["+str(i['set_id'])+"]"
             names.append(name)
             namedict[name] = audio
             durdict[name] = tag.get(audio).duration
