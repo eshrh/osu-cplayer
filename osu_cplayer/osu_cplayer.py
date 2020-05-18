@@ -62,7 +62,7 @@ def getSongs():
             durdict[name] = tag.get(audio).duration
             osudict[name] = Path(os.path.join(cur,i['folder_name'],i['osu_file']))
             timedict[name] = i['last_modification_time']
-        except Exception:
+        except TypeError:
             pass
     return (names,namedict,durdict,osudict,timedict)
 
@@ -383,6 +383,8 @@ def listener(key):
             play(songPlaying)
 def md5(fname):
     hash_md5 = hashlib.md5()
+    if not os.path.exists(fname):
+       return 0
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
