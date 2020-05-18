@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="osu-cplayer", # Replace with your own username
-    version="0.0.2",
+    version="0.0.3",
     author="Eshan Ramesh",
     author_email="esrh@netc.eu",
     description="fast and featured command line osu! song player built on mpv",

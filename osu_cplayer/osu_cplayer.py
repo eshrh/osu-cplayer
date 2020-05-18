@@ -13,11 +13,6 @@ import sys
 from collections import deque
 from locale import setlocale, LC_NUMERIC
 
-
-ABSPATH_TO_SONGS = "/home/eshanrh/.PlayOnLinux/wineprefix/osu_on_linux/drive_c/users/eshanrh/Local Settings/Application Data/osu!/Songs/"
-ABSPATH_TO_COLLECTIONS = "/home/eshanrh/.PlayOnLinux/wineprefix/osu_on_linux/drive_c/users/eshanrh/Local Settings/Application Data/osu!/collection.db"
-ABSPATH_TO_OSU = "/home/eshanrh/.PlayOnLinux/wineprefix/osu_on_linux/drive_c/users/eshanrh/Local Settings/Application Data/osu!/osu!.db"
-
 if not os.path.exists(os.path.expanduser("~/.osupaths")):
     with open(os.path.expanduser("~/.osupaths"),"a+") as f:
         print("paths have not been set.")
