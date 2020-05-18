@@ -35,3 +35,7 @@ Fast, compact, and featured command line osu! song player built on mpv.
 
 ## Other
 osu!.db reading code is taken from [OsuDbReader](https://github.com/Awlexus/PyOsuDBReader/)
+
+## TODO
++ Package and upload to pypi
++ Allow setting of global variables via cli switch
