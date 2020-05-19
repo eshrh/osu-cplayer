@@ -1,9 +1,8 @@
 import os
+import time
 from pathlib import Path
 import random
 import webbrowser
-import time
-import shutil
 import struct
 import hashlib
 import urwid
@@ -13,6 +12,7 @@ import sys
 from collections import deque
 from locale import setlocale, LC_NUMERIC
 
+#check if osupaths config exists, if not, create it with abspaths
 if not os.path.exists(os.path.expanduser("~/.osupaths")):
     with open(os.path.expanduser("~/.osupaths"),"a+") as f:
         print("paths have not been set.")
@@ -28,8 +28,10 @@ else:
         ABSPATH_TO_SONGS,ABSPATH_TO_COLLECTIONS,ABSPATH_TO_OSU=[i.strip() for i in lines]
 
 def getSongs():
+    #gets songs, audio files, osu files, and names.
     cur = ABSPATH_TO_SONGS
     osudb = OsuDbReader(ABSPATH_TO_OSU)
+    #see end of file for this
     beatmaps = osudb.read_all_beatmaps()
     marks = []
     seenID = []
@@ -38,6 +40,7 @@ def getSongs():
     osudict = {}
     timedict = {}
     names = []
+    #delete duplicate beatmaps with the same set id.
     for n,i in enumerate(beatmaps):
         if i['set_id'] in seenID:
             marks.append(n)
@@ -86,19 +89,30 @@ def sortByDate():
         listwalker.append(urwid.AttrMap(Song(i),'','select'))
 
 
+
+'''
+The actual song playing system is a little bit weird because this is a console application.
+We obviously can't just play a song, wait until it's finished and then move on because that would freeze
+the app to user input.
+
+The solution is to use urwid's alarm system. The reason we get the song's durations is so that
+we know when the song is finished. We basically just have to use the progress bar that updates every 0.1 seconds or something
+to check whether we've finished the song or not. We can do this by calculating progress as timenow-timestarted.
+Of course, this doesn't account for pauses, so we can just recalculate this by subtracting the time elapsed mentioned earlier
+from the full duration as soon as we unpause.
+
+I know it's a little bit messy, but it just werks and makes sense if you work through it.
+'''
+
+#initialize some variables to be used globally.
 songStarted = 0
 songAlarm = 0
 songPlaying = 0
 songPaused = 0
-pauseTime = 0
-def trackPlayback(name,duration):
-    global songAlarm
-    global songStarted
-    songStarted = time.time()
-    songAlarm = mainloop.set_alarm_in(duration,nextsong)
 
 
 def nextsong(loop,data):
+    #the key advancement function.
     global loopsong
     if data!=1 and loopsong:
         play(songPlaying)
@@ -127,6 +141,7 @@ def prevsong():
 realSongStart = 0
 progress = 0
 def play(name):
+    #if we start a new song, make sure it doesn't randomly advance because the previous song's alarm went off.
     if songAlarm!=0:
         mainloop.remove_alarm(songAlarm)
     if(player.pause):
@@ -147,13 +162,7 @@ def play(name):
 
     nowplayingtext.set_text(songPlaying)
     mainloop.set_alarm_in(0.1,updateBar)
-
-
-    mainloop.draw_screen();
-
-     #?24 fps?
-
-    #trackPlayback(name,durdict[name])
+    #see updateBar function
 
 def pause():
     global pauseTime
@@ -170,9 +179,9 @@ def pause():
     else:
         pauseTime+=time.time()-songPaused
         barAlarm = mainloop.set_alarm_in(0.1,updateBar)
-        #trackPlayback(songPlaying,durdict[songPlaying]-(pauseTime))
 
-
+#the song object has to react to being individually selected and acted upon
+#I also wanted to define double click functionality, so I modified the text class to check for clicks withing 0.2 seconds. You can change this if you want, I thought it felt nice.
 class Song(urwid.Text):
     def __init__(self,txt):
         self.__super.__init__(txt)
@@ -210,9 +219,11 @@ def getSongList(a):
 
 
 nowplayingtext = urwid.Text("osu-cplayer",'center')
+#default top bar text that will soon be replaced by the title of the playing song.
 def getNowPlaying():
     return urwid.AttrMap(nowplayingtext,'header')
 
+#notifications are important for displaying queue information. It works by hijacking the now playing bar briefly, but it must be manually replaced to the correct text.
 def disp_notif(event):
     storeDefText = nowplayingtext.text
     nowplayingtext.set_text(event)
@@ -228,6 +239,7 @@ progbar = 0
 barAlarm = 0
 
 def pptime(sec):
+    #pretty-formats seconds into minutes and seconds string. I'm pretty sure there's a library for this lmao
     m,s = [int(i) for i in divmod(sec,60)]
     if s==0:
         s = "00"
@@ -235,6 +247,10 @@ def pptime(sec):
         s = str(0)+str(s)
     return f"{m}:{s}"
 
+'''
+the progress bar works with repeating alarms. it must also stop when a song is paused.
+the bar is actually also what triggers the next song.
+'''
 class SongBar(urwid.ProgressBar):
     global progress
     def get_text(self):
@@ -250,7 +266,7 @@ def updateBar(a,b):
     if not player.pause:
         progress = (((time.time()-realSongStart)-pauseTime)/durdict[songPlaying])*100
         progbar.set_completion(progress)
-    if int(progress)==100:
+    if int(progress)>=100:
         nextsong(0,0)
         return 0
     barAlarm = mainloop.set_alarm_in(0.1,updateBar)
@@ -261,10 +277,14 @@ def getSongProgress():
     return progbar
 
 def getHeader():
+    #the header is just a pile of the now playing bar and the progress bar.
     header = urwid.Pile([getNowPlaying(),getSongProgress()])
     return header
 
+
 def filterSongs(term):
+    #the logic that is run everytime a button is pressed in the filter box.
+    #basically just clear it and run through it each time. It's pretty slow but there's no other way.
     global names
     names = [i for i in rawnames if term in i]
     listwalker.clear()
@@ -272,6 +292,57 @@ def filterSongs(term):
         listwalker.append(urwid.AttrMap(Song(i),"","select"))
     if(len(listwalker)>=1):
         listwalker.set_focus(0)
+
+class FilterEdit(urwid.Edit):
+    def keypress(self, size, key):
+        if key=='backspace':
+            self.edit_text = self.edit_text[:-1]
+        elif key=='esc':
+            self.edit_text = ""
+            editboxtext = "filter(:) "
+            frame.focus_position = 'body'
+        elif len(key)==1:
+            self.edit_text += key
+        elif key=='down':
+            footer.focus_position = 1
+        else:
+            frame.focus_position = 'body'
+        filterSongs(self.edit_text)
+
+'''
+Osu collections are actually just lists of md5 hashes. All we need to do to show a collection is
+1. first generate all hashes of all beatmaps
+2. get the list of hashes in the coll
+3. clear the listwalker and put in only beatmaps that have hashes that are in the list of collection hashes.
+'''
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    if not os.path.exists(fname):
+       return 0
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+def generateHashes(osudict):
+    md5s = {}
+    for i in osudict:
+        md5s[i] = md5(osudict[i])
+    return md5s
+
+def getCollections():
+    col = {}
+    f = open(ABSPATH_TO_COLLECTIONS,"rb")
+    nextint(f)
+    ncol = nextint(f)
+    for i in range(ncol):
+        colname = nextstr(f)
+        col[colname] = []
+        for j in range(nextint(f)):
+            f.read(2)
+            col[colname].append(f.read(32).decode('utf-8'))
+    f.close()
+    return col
 
 def showCollection(c):
     global names
@@ -289,23 +360,6 @@ def showCollection(c):
         listwalker.append(urwid.AttrMap(Song(i),"","select"))
     if(len(listwalker)>=1):
         listwalker.set_focus(0)
-
-
-class FilterEdit(urwid.Edit):
-    def keypress(self, size, key):
-        if key=='backspace':
-            self.edit_text = self.edit_text[:-1]
-        elif key=='esc':
-            self.edit_text = ""
-            editboxtext = "filter(:) "
-            frame.focus_position = 'body'
-        elif len(key)==1:
-            self.edit_text += key
-        elif key=='down':
-            footer.focus_position = 1
-        else:
-            frame.focus_position = 'body'
-        filterSongs(self.edit_text)
 
 class CollectionEdit(urwid.Edit):
     def keypress(self, size, key):
@@ -381,20 +435,9 @@ def listener(key):
     if(key=="r"):
         if(songPlaying!=0):
             play(songPlaying)
-def md5(fname):
-    hash_md5 = hashlib.md5()
-    if not os.path.exists(fname):
-       return 0
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
-def generateHashes(osudict):
-    md5s = {}
-    for i in osudict:
-        md5s[i] = md5(osudict[i])
-    return md5s
+
+
 
 def nextint(f):
     return struct.unpack("<I",f.read(4))[0]
@@ -411,26 +454,14 @@ def nextstr(f):
         shift+=7
     return f.read(len).decode('utf-8')
 
-def getCollections():
-    col = {}
-    f = open(ABSPATH_TO_COLLECTIONS,"rb")
-    nextint(f)
-    ncol = nextint(f)
-    for i in range(ncol):
-        colname = nextstr(f)
-        col[colname] = []
-        for j in range(nextint(f)):
-            f.read(2)
-            col[colname].append(f.read(32).decode('utf-8'))
-    f.close()
-    return col
-
 def getDateAdded():
     osudb = OsuDbReader(ABSPATH_TO_OSU)
     times = osudb.read_all_beatmaps()
     timesdict = {}
     return timesdict
 
+#the following code is taken from OsuDbReader licensed GPL. https://github.com/Awlexus/PyOsuDBReader/
+#for some reason it's not a pypi package, so I had to just copypaste this in. I might PR to make it pypi compat though.
 class BasicDbReader:
     def __init__(self, file):
         """
@@ -685,6 +716,7 @@ class OsuDbReader(BasicDbReader):
 def main():
     global a,player,q,qhistory,rawnames,namedict,durdict,osudict,timedict,content,md5s
     global collections,names,content,palette,listBox,frame,mainloop
+    #we're done! just run everything, and hope it works.
     a = 0
     player = mpv.MPV(input_default_bindings=True, input_vo_keyboard=True)
     q = deque()
@@ -708,6 +740,8 @@ def main():
     ]
     listBox = getSongList(a)
     frame = urwid.Frame(listBox,header=getHeader(),footer=getFooter())
+    #compile the frame with the header on top, listbox in the middle, and footer.
     mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
     mainloop.run()
     player.terminate()
+main()
