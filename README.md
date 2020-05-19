@@ -15,6 +15,7 @@ I've tested this on gnu/linux and macos, and it works. Windows is untested thoug
 + Move Selection: `up`/`down`, left click, or scroll
 + Play song: `enter` or double click
 + Toggle play/pause: `p`
++ Restart song and play: `r`
 + Quit: `q` or `esc`
 + Add song to queue: `a`
 + Clear queue: `A`
