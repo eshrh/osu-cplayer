@@ -744,4 +744,3 @@ def main():
     mainloop = urwid.MainLoop(frame,unhandled_input=listener,palette=palette)
     mainloop.run()
     player.terminate()
-main()
