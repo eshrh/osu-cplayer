@@ -37,3 +37,5 @@ osu!.db reading code is taken from [OsuDbReader](https://github.com/Awlexus/PyOs
 + [urwid](https://github.com/urwid/urwid/wiki/Installation-instructions)
 + [tinytag](https://github.com/devsnd/tinytag)
 
+## TODO
++ holy hell please refactor lmao
