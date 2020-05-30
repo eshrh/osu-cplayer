@@ -38,4 +38,4 @@ osu!.db reading code is taken from [OsuDbReader](https://github.com/Awlexus/PyOs
 + [tinytag](https://github.com/devsnd/tinytag)
 
 ## TODO
-+ holy hell please refactor lmao
++ holy hell please refactor lmao. If anyone looks at my code, I apologize in advance. This is ultra hacky and I really just wanted to build this to use for myself ASAP
